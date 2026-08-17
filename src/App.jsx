@@ -41,7 +41,7 @@ function Snowfall() {
 function MusicPlayer() {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.1);
+  const [volume, setVolume] = useState(0.7);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [expanded, setExpanded] = useState(false);
@@ -495,11 +495,14 @@ function ProjectsPage({ onNav }) {
   );
 }
 
+const CURSOR_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAB9ElEQVR4nI2UsWpUURCGv9l7kzKmSIhiUBRLC0VisNBO7ARLm2inpT6EL5ImttrZaiEKVoIWgpBA3ECMRpcgIbv5LO7c5GTdjRkY7jkzc/+ZM/OfA2NEjfxOqyvqc3W69J1Y1I4a6jn1ndpLfa+eT19n1L+dEUAV0IkIgSXgKvAr9QqwlL6OWg0D1wlUAUbEfgFeAz+AQZG4D2ypdUT0y0KAiIjB8FEvqLfVqcK2XBx5ubBPZezFIxWqp4BrwH3gDjALfFRXgK9AFzDju+pd4FLGXwY21VfACvAB9aG6aiM9tavu5f63uqVupG6lTbWfsb3cr6oP2vJn1Efqa3U9j3lTnVfvqdvqz1zPq7cyZl19oz5WZ1qwA07llM8M9XUxAbfVxSHf6XLKatQRYYJWOblu7idyqhMFxmQC1EA/IjYKRgwiwppm3gL9ttpMMshhVBzSpkrbICL2i/gDCh0hZUSY4HBI7utZUQ0stKQeET9e2r6os+oX9bu6mevZMmZY/jHmMVTPAi+BOWCPpp9zwIv06YhHYmQWIBLkM83Va6UPfErfyV+cvNuoC+qO+i11R10oY05aYTvBNZqrNwFM5notfftj/v1vlU/VP6lPjqsOjulDVtES/G2ab9D0byxd6rGZGnJ3ImJXfdaYYletyndzWP4CgRPutP2y/CwAAAAASUVORK5CYII=";
+
 /* ── App ──────────────────────────────────────────────────────────────────── */
 export default function App() {
   const [page, setPage] = useState("home");
   return (
-    <div style={{ minHeight: "100vh", background: "#080808", color: "white", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: "#080808", color: "white", position: "relative", overflow: "hidden", cursor: `url("${CURSOR_URI}") 10 10, crosshair` }}>
+      <style>{`* { cursor: url("${CURSOR_URI}") 10 10, crosshair !important; } a, button, [role="button"] { cursor: url("${CURSOR_URI}") 10 10, pointer !important; }`}</style>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
       <Snowfall />
       <MusicPlayer />
