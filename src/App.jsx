@@ -41,7 +41,7 @@ function Snowfall() {
 function MusicPlayer() {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.7);
+  const [volume, setVolume] = useState(0.1);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [expanded, setExpanded] = useState(false);
