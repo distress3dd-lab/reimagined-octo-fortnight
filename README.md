@@ -30,3 +30,7 @@ The `/api/visitors` Vercel function uses `@upstash/redis` and `Redis.fromEnv()` 
 - `localStorage` prevents the same browser from incrementing the count again after refreshes or future sessions.
 
 This is a lightweight portfolio counter, not fraud-proof analytics. Clearing browser storage, using another browser/device, or deliberately calling the endpoint can create additional counts.
+
+
+## Redis troubleshooting
+If `/api/visitors` returns an error, this version includes temporary diagnostics showing `details`, `hasRedisUrl`, and `hasRedisToken`. These values do not expose the Redis credentials.

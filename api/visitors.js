@@ -1,6 +1,5 @@
 import { Redis } from "@upstash/redis";
 
-const redis = Redis.fromEnv();
 const KEY = "demire:visitor_count";
 
 export default async function handler(req, res) {
@@ -8,6 +7,10 @@ export default async function handler(req, res) {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
 
   try {
+    // Create the client inside the handler so configuration errors are caught
+    // and returned as a useful diagnostic instead of failing silently.
+    const redis = Redis.fromEnv();
+
     if (req.method === "GET") {
       const count = (await redis.get(KEY)) ?? 0;
       return res.status(200).json({ count: Number(count) });
@@ -22,6 +25,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   } catch (error) {
     console.error("Visitor counter error:", error);
-    return res.status(500).json({ error: "Visitor counter unavailable" });
+
+    // Temporary diagnostics: exposes only the error message, never Redis secrets.
+    return res.status(500).json({
+      error: "Visitor counter unavailable",
+      details: error instanceof Error ? error.message : String(error),
+      hasRedisUrl: Boolean(process.env.UPSTASH_REDIS_REST_URL),
+      hasRedisToken: Boolean(process.env.UPSTASH_REDIS_REST_TOKEN)
+    });
   }
 }
