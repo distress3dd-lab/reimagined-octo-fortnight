@@ -462,7 +462,7 @@ function HomePage({ onNav }) {
       <div style={{ opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(18px)", transition: "opacity 0.9s ease, transform 0.9s ease", textAlign: "center", marginBottom: 64 }}>
         <h1 style={{ fontFamily: serif, fontSize: "clamp(4rem, 14vw, 10rem)", fontWeight: 900, color: "white", letterSpacing: "-0.02em", lineHeight: 1, margin: 0, userSelect: "none" }}>demire</h1>
         <div style={{ marginTop: 16, height: "1px", background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)" }} />
-        <p style={{ fontFamily: mono, fontSize: "0.7rem", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", margin: "14px 0 0 0" }}>larp king</p>
+        <p style={{ fontFamily: mono, fontSize: "0.7rem", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", margin: "14px 0 0 0" }}>i like finding and exploiting stuff</p>
       </div>
       <div style={{ display: "flex", gap: 48, marginTop: -32, opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(14px)", transition: "opacity 0.9s ease 0.3s, transform 0.9s ease 0.3s" }}>
         <NavIcon icon={FolderIcon} label="Projects" onClick={() => onNav("projects")} />
