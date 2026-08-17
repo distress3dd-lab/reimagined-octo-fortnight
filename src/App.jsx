@@ -41,7 +41,7 @@ function Snowfall() {
 function MusicPlayer() {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.1);
+  const [volume, setVolume] = useState(0.7);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [expanded, setExpanded] = useState(false);
@@ -394,17 +394,86 @@ function ProjectDetail({ project, onClose }) {
   );
 }
 
+/* ── Visitor Counter ──────────────────────────────────────────────────────── */
+function VisitorCounter() {
+  const [count, setCount] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const updateCounter = async () => {
+      const counted = localStorage.getItem("demire_counted");
+
+      const shouldCount = !counted;
+
+      // Lock immediately so React re-renders / Strict Mode cannot send two POSTs.
+      if (shouldCount) localStorage.setItem("demire_counted", "pending");
+
+      try {
+        const res = await fetch("/api/visitors", {
+          method: shouldCount ? "POST" : "GET",
+          headers: { Accept: "application/json" },
+        });
+
+        if (!res.ok) throw new Error("Counter request failed");
+
+        const data = await res.json();
+        if (shouldCount) localStorage.setItem("demire_counted", "1");
+        if (!cancelled) setCount(data.count);
+      } catch (_) {
+        // Clear the pending lock so a future visit can retry the real counter.
+        if (shouldCount) localStorage.removeItem("demire_counted");
+
+        // Development / storage fallback: this is only local to the browser.
+        const stored = parseInt(localStorage.getItem("demire_visits") || "0", 10);
+        const next = shouldCount ? stored + 1 : stored;
+        if (shouldCount) localStorage.setItem("demire_visits", String(next));
+        if (!cancelled) setCount(next);
+      }
+    };
+
+    updateCounter();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div style={{
+      position: "fixed", top: 20, right: 24, zIndex: 50,
+      display: "flex", alignItems: "center", gap: 12,
+      fontFamily: mono, fontSize: "0.9rem", letterSpacing: "0.18em",
+      textTransform: "uppercase", color: "rgba(255,255,255,0.55)",
+      userSelect: "none",
+    }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span>{count === null ? "..." : count.toLocaleString()}</span>
+    </div>
+  );
+}
+
 /* ── Project Card ─────────────────────────────────────────────────────────── */
 function ProjectCard({ project, onClick }) {
   const [hov, setHov] = useState(false);
+  const isPrivate = project.private;
   return (
-    <div onClick={() => onClick(project)} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{ border: `1px solid ${hov ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.16)"}`, padding: "32px 36px", cursor: "pointer", background: hov ? "rgba(255,255,255,0.04)" : "transparent", transition: "border-color 0.2s, background 0.2s, transform 0.2s", transform: hov ? "translateY(-3px)" : "translateY(0)", position: "relative", maxWidth: 480, width: "100%" }}>
+    <div onClick={() => !isPrivate && onClick(project)} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      style={{ border: `1px solid ${hov ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.16)"}`, padding: "32px 36px", cursor: isPrivate ? "default" : "pointer", background: hov ? "rgba(255,255,255,0.04)" : "transparent", transition: "border-color 0.2s, background 0.2s, transform 0.2s", transform: (!isPrivate && hov) ? "translateY(-3px)" : "translateY(0)", position: "relative", maxWidth: 480, width: "100%" }}>
       <div style={{ position: "absolute", top: 0, left: 0, width: hov ? "100%" : "0%", height: "1px", background: "white", transition: "width 0.35s ease" }} />
-      <p style={{ fontFamily: mono, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", margin: "0 0 10px 0" }}>{project.tag}</p>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+        <p style={{ fontFamily: mono, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", margin: 0 }}>{project.tag}</p>
+        {isPrivate && (
+          <span style={{ fontFamily: mono, fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", border: "1px solid rgba(255,255,255,0.18)", padding: "2px 7px", color: "rgba(255,255,255,0.3)" }}>private</span>
+        )}
+      </div>
       <h3 style={{ fontFamily: serif, fontSize: "1.7rem", fontWeight: 700, color: "white", margin: "0 0 10px 0" }}>{project.name}</h3>
       <p style={{ fontFamily: mono, fontSize: "0.78rem", lineHeight: 1.65, color: "rgba(255,255,255,0.52)", margin: 0 }}>{project.blurb}</p>
-      <div style={{ marginTop: 20, fontFamily: mono, fontSize: "0.68rem", letterSpacing: "0.15em", textTransform: "uppercase", color: hov ? "white" : "rgba(255,255,255,0.3)", transition: "color 0.2s" }}>Read more +</div>
+      {!isPrivate && (
+        <div style={{ marginTop: 20, fontFamily: mono, fontSize: "0.68rem", letterSpacing: "0.15em", textTransform: "uppercase", color: hov ? "white" : "rgba(255,255,255,0.3)", transition: "color 0.2s" }}>Read more +</div>
+      )}
     </div>
   );
 }
@@ -424,6 +493,19 @@ const PROJECTS = [
       { heading: "Tech stack", body: "Java 21, Fabric Loader, Fabric API, Gson for config. The larpflip.json file persists your full watch list, Discord webhook URL, notification toggles, cooldown duration, rescan interval, and debug mode toggle." },
     ],
     tags: ["Java", "Fabric", "Minecraft", "Discord", "DonutSMP"],
+  },
+  {
+    name: "Inertia Client",
+    tag: "Private Fabric Client",
+    blurb: "Can't reveal much since it's a private client for 1.21.1 Fabric",
+    sections: [
+      {
+        heading: "Status",
+        body: "This is a private project. Details are not public.",
+      },
+    ],
+    tags: ["Java", "Fabric", "1.21.1", "Private"],
+    private: true,
   },
 ];
 
@@ -462,7 +544,7 @@ function HomePage({ onNav }) {
       <div style={{ opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(18px)", transition: "opacity 0.9s ease, transform 0.9s ease", textAlign: "center", marginBottom: 64 }}>
         <h1 style={{ fontFamily: serif, fontSize: "clamp(4rem, 14vw, 10rem)", fontWeight: 900, color: "white", letterSpacing: "-0.02em", lineHeight: 1, margin: 0, userSelect: "none" }}>demire</h1>
         <div style={{ marginTop: 16, height: "1px", background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)" }} />
-        <p style={{ fontFamily: mono, fontSize: "0.7rem", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", margin: "14px 0 0 0" }}>i like finding and exploiting stuff</p>
+        <p style={{ fontFamily: mono, fontSize: "0.7rem", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", margin: "14px 0 0 0" }}>larp king</p>
       </div>
       <div style={{ display: "flex", gap: 48, marginTop: -32, opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(14px)", transition: "opacity 0.9s ease 0.3s, transform 0.9s ease 0.3s" }}>
         <NavIcon icon={FolderIcon} label="Projects" onClick={() => onNav("projects")} />
@@ -505,6 +587,7 @@ export default function App() {
       <style>{`* { cursor: url("${CURSOR_URI}") 10 10, crosshair !important; } a, button, [role="button"] { cursor: url("${CURSOR_URI}") 10 10, pointer !important; }`}</style>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
       <Snowfall />
+      <VisitorCounter />
       <MusicPlayer />
       {page === "home" && <HomePage onNav={setPage} />}
       {page === "projects" && <ProjectsPage onNav={setPage} />}
